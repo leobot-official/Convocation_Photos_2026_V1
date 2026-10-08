@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- GOOGLE IDENTITY SERVICES SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HITS DegreeFrame - Academic Convocation Portal</title>
+  
+  <!-- Bootstrap 5.3 & Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-navy: #1a365d;
+      --accent-blue: #2b6cb0;
+    }
+
+    body {
+      background: #f4f6f9;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar-custom {
+      background-color: var(--primary-navy);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .nav-pills .nav-link {
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 600;
+      border-radius: 30px;
+      padding: 8px 20px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-pills .nav-link.active {
+      background-color: var(--accent-blue) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(43, 108, 176, 0.4);
+    }
+
+    .university-logo-nav {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      background: #ffffff;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .app-card {
+      background: #ffffff;
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    footer {
+      margin-top: auto;
+      background: var(--primary-navy);
+      color: rgba(255, 255, 255, 0.7);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVBAR WITH UNIVERSITY LOGO -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+        <img src="https://lh3.googleusercontent.com/d/148OBvNZskDANpINQYJcSB9NdXX71tB-T" alt="HITS Logo" class="university-logo-nav">
+        <span class="fw-bold fs-5 d-none d-sm-inline text-white">HITS DegreeFrame</span>
+      </a>
+      
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse mt-2 mt-lg-0" id="navbarNav">
+        <ul class="nav nav-pills ms-auto gap-1" id="portalTabs">
+          <li class="nav-item">
+            <button class="nav-link active" id="btnStudentView" onclick="switchPortal('student')">
+              <i class="bi bi-person-circle me-1"></i> Student Portal
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="btnFacultyView" onclick="switchPortal('faculty')">
+              <i class="bi bi-shield-check me-1"></i> Faculty Review Portal
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN DYNAMIC CONTENT CONTAINER -->
+  <main class="container my-4 my-md-5">
+    <div id="portalContainer"></div>
+  </main>
+
+  <footer class="py-3 text-center text-small">
+    <div class="container">
+      <small>&copy; Hindustan Institute of Technology & Science. All Rights Reserved.</small>
+    </div>
+  </footer>
+
+  <!-- BOOTSTRAP 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- CONFIGURATION & DYNAMIC LOADER -->
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFKqXY1sdqGuSOkzcXN1S9Pu3MkC-1z-GxGPUS_sHG_3GSBwLv5HYSW5Knf_TBwqdb/exec";
+    const GOOGLE_CLIENT_ID = "984380290235-fhvahq5uitrbecgttrm3q27emlhsb8bg.apps.googleusercontent.com";
+
+    // GLOBAL HELPER TO RELIABLY RENDER GOOGLE SIGN-IN BUTTON IN DYNAMIC VIEWS
+    window.renderGoogleSignIn = function(containerId, callbackFn) {
+      const checkAndRender = () => {
+        if (typeof google !== 'undefined' && google && google.accounts && google.accounts.id) {
+          const btnContainer = document.getElementById(containerId);
+          if (btnContainer) {
+            btnContainer.innerHTML = ""; // Clear existing button before rendering
+            google.accounts.id.initialize({
+              client_id: GOOGLE_CLIENT_ID,
+              callback: callbackFn
+            });
+            google.accounts.id.renderButton(
+              btnContainer,
+              { theme: "outline", size: "large", type: "standard", shape: "rectangular", text: "signin_with", width: "250" }
+            );
+          }
+        } else {
+          // Retry if GIS SDK is still initializing
+          setTimeout(checkAndRender, 100);
+        }
+      };
+      setTimeout(checkAndRender, 100);
+    };
+
+    async function switchPortal(view) {
+      const container = document.getElementById('portalContainer');
+      const studentBtn = document.getElementById('btnStudentView');
+      const facultyBtn = document.getElementById('btnFacultyView');
+
+      container.innerHTML = `
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+          <p class="mt-3 fw-semibold text-secondary">Loading Portal Module...</p>
+        </div>`;
+
+      try {
+        const fileToFetch = view === 'student' ? 'student.html' : 'faculty.html';
+        
+        if (view === 'student') {
+          studentBtn.classList.add('active');
+          facultyBtn.classList.remove('active');
+        } else {
+          facultyBtn.classList.add('active');
+          studentBtn.classList.remove('active');
+        }
+
+        const response = await fetch(fileToFetch);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const htmlText = await response.text();
+        
+        // Remove old dynamically injected portal scripts
+        document.querySelectorAll('.dynamic-portal-script').forEach(s => s.remove());
+
+        // Inject HTML
+        container.innerHTML = htmlText;
+
+        // Execute script tags inside dynamic HTML safely
+        const scriptTags = container.querySelectorAll('script');
+        scriptTags.forEach(script => {
+          if (script.src && script.src.includes('accounts.google.com/gsi/client')) {
+            return; // Skip duplicating GIS SDK script
+          }
+          const newScript = document.createElement('script');
+          newScript.classList.add('dynamic-portal-script');
+          if (script.src) {
+            newScript.src = script.src;
+          } else {
+            newScript.textContent = script.textContent;
+          }
+          document.body.appendChild(newScript);
+        });
+
+      } catch (err) {
+        container.innerHTML = `
+          <div class="alert alert-danger p-4 text-center">
+            <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+            <h5 class="mt-2">Failed to load interface module</h5>
+            <p class="mb-0">${err.message}</p>
+          </div>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      switchPortal('student');
+    });
+  </script>
+</body>
+</html>
