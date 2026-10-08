@@ -264,6 +264,9 @@
               </div>
             </div>
 
+            <!-- INLINE VALIDATION ALERT FOR STEP 2 -->
+            <div id="step2Alert" class="mb-3"></div>
+
             <!-- CONFIRMATION -->
             <div class="form-check mb-4">
               <input class="form-check-input" type="checkbox" id="chkDetailsConfirmed">
@@ -295,6 +298,7 @@
                 </label>
                 <input type="file" class="form-control form-control-lg" id="photoFileInput" accept="image/jpeg,image/jpg" required onchange="previewPhoto(this)">
                 <small class="text-muted d-block mt-1">Requirements: Formal studio photo, 35mm x 40mm, neutral expression, eyes open, no selfies.</small>
+                <div id="photoValidationAlert" class="mt-2"></div>
               </div>
               <div class="col-md-4 text-center">
                 <label class="form-label fw-bold small text-muted d-block">Preview</label>
@@ -383,12 +387,9 @@
 
 <!-- CLIENT SCRIPT LOGIC -->
 <script>
-  // CONFIGURATION: Replace with your deployed Google Apps Script Web App URL
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_REPLACE_WITH_YOUR_EXEC_ID/exec";
-
   var authenticatedStudentEmail = window.authenticatedStudentEmail || "";
 
-  // 1. EMAIL + OTP AUTHENTICATION
   window.requestOtp = async function() {
     const emailInput = document.getElementById('userAuthEmail').value.trim().toLowerCase();
     const alertBox = document.getElementById('authAlert');
@@ -397,7 +398,7 @@
     alertBox.innerHTML = '';
 
     if (!emailInput || (!emailInput.endsWith('@hindustanuniv.ac.in') && !emailInput.endsWith('@gmail.com'))) {
-      alertBox.innerHTML = `<div class="alert alert-danger py-2">Please enter a valid @hindustanuniv.ac.in or @gmail.com email address.</div>`;
+      alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please enter a valid @hindustanuniv.ac.in or @gmail.com email address.</div>`;
       return;
     }
 
@@ -415,12 +416,12 @@
         authenticatedStudentEmail = emailInput;
         document.getElementById('emailInputStep').style.display = 'none';
         document.getElementById('otpInputStep').style.display = 'flex';
-        alertBox.innerHTML = `<div class="alert alert-success py-2">OTP code sent to <strong>${emailInput}</strong>. Please check your inbox.</div>`;
+        alertBox.innerHTML = `<div class="alert alert-success py-2"><i class="bi bi-check-circle-fill me-2"></i>OTP code sent to <strong>${emailInput}</strong>. Please check your inbox.</div>`;
       } else {
-        alertBox.innerHTML = `<div class="alert alert-danger py-2">${res.message || 'Failed to send OTP.'}</div>`;
+        alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-x-circle-fill me-2"></i>${res.message || 'Failed to send OTP.'}</div>`;
       }
     } catch (err) {
-      alertBox.innerHTML = `<div class="alert alert-danger py-2">Error sending request: ${err.message}</div>`;
+      alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-exclamation-octagon-fill me-2"></i>Error sending request: ${err.message}</div>`;
     } finally {
       btnSend.disabled = false;
       btnSend.innerHTML = `Send OTP`;
@@ -433,7 +434,7 @@
     const btnVerify = document.getElementById('btnVerifyOtp');
 
     if (!otpEntered || otpEntered.length !== 6) {
-      alertBox.innerHTML = `<div class="alert alert-warning py-2">Please enter a valid 6-digit OTP code.</div>`;
+      alertBox.innerHTML = `<div class="alert alert-warning py-2"><i class="bi bi-exclamation-circle-fill me-2"></i>Please enter a valid 6-digit OTP code.</div>`;
       return;
     }
 
@@ -453,23 +454,21 @@
       const res = await response.json();
 
       if (res.success) {
-        // Show application portal
         document.getElementById('authSection').style.display = 'none';
         document.getElementById('authenticatedPortalWrapper').style.display = 'block';
         document.getElementById('userEmailBadge').innerText = authenticatedStudentEmail;
         document.getElementById('displayEmail').value = authenticatedStudentEmail;
 
-        // AUTOMATICALLY SHOW PHOTO INSTRUCTION MODAL UPON SUCCESSFUL LOGIN
         const photoModalElement = document.getElementById('photoInstructionModal');
         if (photoModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
           const photoModal = new bootstrap.Modal(photoModalElement);
           photoModal.show();
         }
       } else {
-        alertBox.innerHTML = `<div class="alert alert-danger py-2">${res.message || 'Invalid or expired OTP.'}</div>`;
+        alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-x-circle-fill me-2"></i>${res.message || 'Invalid or expired OTP.'}</div>`;
       }
     } catch (err) {
-      alertBox.innerHTML = `<div class="alert alert-danger py-2">Error verifying OTP: ${err.message}</div>`;
+      alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-exclamation-octagon-fill me-2"></i>Error verifying OTP: ${err.message}</div>`;
     } finally {
       btnVerify.disabled = false;
       btnVerify.innerHTML = `Verify & Login`;
@@ -492,7 +491,6 @@
     resetAuthStep();
   };
 
-  // 2. TAB SWITCHER
   window.switchStudentTab = function(showId, hideId, activeBtn, inactiveBtnId) {
     const showEl = document.getElementById(showId);
     const hideEl = document.getElementById(hideId);
@@ -517,7 +515,6 @@
     checkStatus();
   };
 
-  // 3. FETCH STUDENT DATA
   window.fetchStudentDataForVerification = async function() {
     const regNo = document.getElementById('lookupRegNoInput').value.trim();
     const alertBox = document.getElementById('lookupAlert');
@@ -573,7 +570,6 @@
     }
   };
 
-  // FIELD TOGGLES
   window.toggleCorrectionField = function(field) {
     const isChecked = document.getElementById(`chk${field}Correction`).checked;
 
@@ -619,19 +615,22 @@
   }
 
   window.proceedToPhotoStep = function() {
+    const alertBox = document.getElementById('step2Alert');
+    alertBox.innerHTML = '';
+
     if (!document.getElementById('chkDetailsConfirmed').checked) {
-      alert("Please confirm the declaration checkbox before proceeding.");
+      alertBox.innerHTML = `<div class="alert alert-warning py-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please confirm the declaration checkbox before proceeding.</div>`;
       return;
     }
     if (!document.getElementById('displaySection').value.trim()) {
-      alert("Please enter your Section.");
+      alertBox.innerHTML = `<div class="alert alert-warning py-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please enter your Section.</div>`;
       return;
     }
 
     if (document.getElementById('chkNameCorrection').checked) {
       const f10 = document.getElementById('proof10thFileInput');
       if (!f10 || !f10.files || !f10.files[0]) {
-        alert("Please upload your 10th Marksheet Proof Document.");
+        alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-file-earmark-x-fill me-2"></i>Please upload your 10th Marksheet Proof Document for Name correction.</div>`;
         return;
       }
     }
@@ -643,7 +642,7 @@
     if (requiresTc) {
       const fTc = document.getElementById('proofTcFileInput');
       if (!fTc || !fTc.files || !fTc.files[0]) {
-        alert("Please upload your Transfer Certificate (TC) Proof Document.");
+        alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-file-earmark-x-fill me-2"></i>Please upload your Transfer Certificate (TC) Proof Document for profile corrections.</div>`;
         return;
       }
     }
@@ -659,10 +658,13 @@
 
   window.previewPhoto = function(input) {
     const previewContainer = document.getElementById('photoPreviewContainer');
+    const photoAlert = document.getElementById('photoValidationAlert');
+    photoAlert.innerHTML = '';
+
     if (input.files && input.files[0]) {
       const file = input.files[0];
       if (file.size > 80 * 1024) {
-        alert("File size exceeds 80KB limit! Please compress your image.");
+        photoAlert.innerHTML = `<div class="alert alert-danger py-1 small mt-2"><i class="bi bi-exclamation-circle-fill me-1"></i>File size exceeds 80KB limit! (${(file.size/1024).toFixed(1)}KB). Please compress your image.</div>`;
         input.value = "";
         previewContainer.innerHTML = `<i class="bi bi-person text-secondary fs-1"></i>`;
         return;
