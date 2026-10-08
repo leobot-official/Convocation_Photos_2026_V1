@@ -1,207 +1,381 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- GOOGLE IDENTITY SERVICES SDK -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HITS DegreeFrame - Academic Convocation Portal</title>
-  
-  <!-- Bootstrap 5.3 & Icons CDN -->
+  <title>Faculty Portal - Convocation Clearance | HITS</title>
+  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   
   <style>
-    :root {
-      --primary-navy: #1a365d;
-      --accent-blue: #2b6cb0;
-    }
-
     body {
-      background: #f4f6f9;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      padding-top: 2rem;
+      padding-bottom: 3rem;
     }
-
-    .navbar-custom {
-      background-color: var(--primary-navy);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .nav-pills .nav-link {
-      color: rgba(255, 255, 255, 0.85);
-      font-weight: 600;
-      border-radius: 30px;
-      padding: 8px 20px;
-      transition: all 0.3s ease;
-    }
-
-    .nav-pills .nav-link.active {
-      background-color: var(--accent-blue) !important;
-      color: #ffffff !important;
-      box-shadow: 0 2px 8px rgba(43, 108, 176, 0.4);
-    }
-
-    .university-logo-nav {
-      height: 48px;
-      width: auto;
-      object-fit: contain;
-      background: #ffffff;
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-
     .app-card {
+      max-width: 950px;
+      margin: 0 auto;
       background: #ffffff;
-      border: none;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      border-radius: 1.25rem;
+      box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.05);
     }
-
-    footer {
-      margin-top: auto;
-      background: var(--primary-navy);
-      color: rgba(255, 255, 255, 0.7);
+    .letter-spacing-2 {
+      letter-spacing: 2px;
     }
   </style>
 </head>
 <body>
 
-  <!-- TOP NAVBAR WITH UNIVERSITY LOGO -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-3" href="#">
-        <img src="https://lh3.googleusercontent.com/d/148OBvNZskDANpINQYJcSB9NdXX71tB-T" alt="HITS Logo" class="university-logo-nav">
-        <span class="fw-bold fs-5 d-none d-sm-inline text-white">HITS DegreeFrame</span>
-      </a>
-      
-      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse mt-2 mt-lg-0" id="navbarNav">
-        <ul class="nav nav-pills ms-auto gap-1" id="portalTabs">
-          <li class="nav-item">
-            <button class="nav-link active" id="btnStudentView" onclick="switchPortal('student')">
-              <i class="bi bi-person-circle me-1"></i> Student Portal
-            </button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" id="btnFacultyView" onclick="switchPortal('faculty')">
-              <i class="bi bi-shield-check me-1"></i> Faculty Review Portal
-            </button>
-          </li>
-        </ul>
+<div class="container">
+  <div class="app-card p-3 p-md-4">
+    <!-- BRANDING HEADER -->
+    <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded-4 mb-4 border">
+      <div>
+        <h5 class="fw-bold text-dark mb-0">Faculty Approval Portal</h5>
+        <small class="text-muted">Hindustan Institute of Technology & Science — Faculty Portal</small>
       </div>
+      <a href="../" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="bi bi-house me-1"></i> Home</a>
     </div>
-  </nav>
 
-  <!-- MAIN DYNAMIC CONTENT CONTAINER -->
-  <main class="container my-4 my-md-5">
-    <div id="portalContainer"></div>
-  </main>
+    <!-- EMAIL + OTP FACULTY AUTHENTICATION SECTION -->
+    <div id="facultyAuthSection" class="card border-0 bg-light p-4 mb-4 rounded-4 shadow-sm text-center">
+      <h5 class="fw-bold text-primary mb-2"><i class="bi bi-shield-lock me-2"></i>Faculty Authentication</h5>
+      <p class="text-muted small mb-3">Please sign in with your official university email (@hindustanuniv.ac.in).</p>
+      
+      <!-- EMAIL STEP -->
+      <div class="row justify-content-center g-2" id="facultyEmailInputStep">
+        <div class="col-md-7">
+          <input type="email" id="facultyAuthEmail" class="form-control form-control-lg" placeholder="faculty@hindustanuniv.ac.in" required>
+        </div>
+        <div class="col-md-3">
+          <button type="button" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" id="btnFacultySendOtp" onclick="requestFacultyOtp()">
+            Send OTP
+          </button>
+        </div>
+      </div>
 
-  <footer class="py-3 text-center text-small">
-    <div class="container">
-      <small>&copy; Hindustan Institute of Technology & Science. All Rights Reserved.</small>
+      <!-- OTP STEP (HIDDEN INITIALLY) -->
+      <div class="row justify-content-center g-2 mt-3" id="facultyOtpInputStep" style="display: none;">
+        <div class="col-md-5">
+          <input type="text" id="facultyAuthOtp" class="form-control form-control-lg text-center fw-bold letter-spacing-2" placeholder="ENTER 6-DIGIT OTP" maxlength="6">
+        </div>
+        <div class="col-md-3">
+          <button type="button" class="btn btn-success btn-lg w-100 fw-bold shadow-sm" id="btnFacultyVerifyOtp" onclick="verifyFacultyOtp()">
+            Verify & Login
+          </button>
+        </div>
+        <div class="col-12 mt-2">
+          <button type="button" class="btn btn-link btn-sm text-decoration-none" onclick="resetFacultyAuthStep()">← Change Email</button>
+        </div>
+      </div>
+
+      <div id="facultyAuthAlert" class="mt-3"></div>
     </div>
-  </footer>
 
-  <!-- BOOTSTRAP 5 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AUTHENTICATED FACULTY DASHBOARD (HIDDEN UNTIL LOGIN SUCCESS) -->
+    <div id="facultyPortalWrapper" style="display: none;">
+      
+      <!-- FACULTY USER INFO CARD -->
+      <div class="card bg-primary text-white p-3 rounded-4 mb-4 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="fw-bold mb-1" id="facName">--</h6>
+            <div class="small opacity-75">
+              <span id="facRoleBadge" class="badge bg-light text-primary me-2"></span>
+              Dept: <strong id="facDept">--</strong> | Spec: <strong id="facSpec">--</strong> | Sec: <strong id="facSec">--</strong>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-outline-light" onclick="logoutFaculty()"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
+        </div>
+      </div>
 
-  <!-- CONFIGURATION & DYNAMIC LOADER -->
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFKqXY1sdqGuSOkzcXN1S9Pu3MkC-1z-GxGPUS_sHG_3GSBwLv5HYSW5Knf_TBwqdb/exec";
-    const GOOGLE_CLIENT_ID = "984380290235-fhvahq5uitrbecgttrm3q27emlhsb8bg.apps.googleusercontent.com";
+      <!-- INLINE FACULTY ACTION ALERT FEEDBACK -->
+      <div id="facultyActionAlert" class="mb-3"></div>
 
-    // GLOBAL HELPER TO RELIABLY RENDER GOOGLE SIGN-IN BUTTON IN DYNAMIC VIEWS
-    window.renderGoogleSignIn = function(containerId, callbackFn) {
-      const checkAndRender = () => {
-        if (typeof google !== 'undefined' && google && google.accounts && google.accounts.id) {
-          const btnContainer = document.getElementById(containerId);
-          if (btnContainer) {
-            btnContainer.innerHTML = ""; // Clear existing button before rendering
-            google.accounts.id.initialize({
-              client_id: GOOGLE_CLIENT_ID,
-              callback: callbackFn
-            });
-            google.accounts.id.renderButton(
-              btnContainer,
-              { theme: "outline", size: "large", type: "standard", shape: "rectangular", text: "signin_with", width: "250" }
-            );
-          }
-        } else {
-          // Retry if GIS SDK is still initializing
-          setTimeout(checkAndRender, 100);
-        }
-      };
-      setTimeout(checkAndRender, 100);
-    };
+      <!-- PENDING APPROVALS LIST -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-card-checklist me-2"></i>Pending Applications</h5>
+        <button class="btn btn-outline-primary btn-sm fw-bold" onclick="loadPendingApplications()">
+          <i class="bi bi-arrow-clockwise me-1"></i> Refresh List
+        </button>
+      </div>
 
-    async function switchPortal(view) {
-      const container = document.getElementById('portalContainer');
-      const studentBtn = document.getElementById('btnStudentView');
-      const facultyBtn = document.getElementById('btnFacultyView');
+      <div id="applicationsContainer">
+        <div class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span> Loading requests...</div>
+      </div>
 
-      container.innerHTML = `
-        <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-          <p class="mt-3 fw-semibold text-secondary">Loading Portal Module...</p>
-        </div>`;
+    </div>
+  </div>
+</div>
 
-      try {
-        const fileToFetch = view === 'student' ? 'student.html' : 'faculty.html';
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- FACULTY PORTAL SCRIPT -->
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_REPLACE_WITH_YOUR_EXEC_ID/exec";
+  let currentFaculty = null;
+
+  window.requestFacultyOtp = async function() {
+    const emailInput = document.getElementById('facultyAuthEmail').value.trim().toLowerCase();
+    const alertBox = document.getElementById('facultyAuthAlert');
+    const btnSend = document.getElementById('btnFacultySendOtp');
+
+    if (alertBox) alertBox.innerHTML = '';
+
+    if (!emailInput || !emailInput.endsWith('@hindustanuniv.ac.in')) {
+      if (alertBox) alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-shield-x me-2"></i>Access Denied: Faculty login requires an official @hindustanuniv.ac.in email address.</div>`;
+      return;
+    }
+
+    btnSend.disabled = true;
+    btnSend.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Sending...`;
+
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "sendOtp", email: emailInput })
+      });
+      const res = await response.json();
+
+      if (res.success) {
+        document.getElementById('facultyEmailInputStep').style.display = 'none';
+        document.getElementById('facultyOtpInputStep').style.display = 'flex';
+        if (alertBox) alertBox.innerHTML = `<div class="alert alert-success py-2"><i class="bi bi-check-circle-fill me-2"></i>OTP code sent to <strong>${emailInput}</strong>. Please check your inbox.</div>`;
+      } else {
+        if (alertBox) alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-x-circle-fill me-2"></i>${res.message || 'Failed to send OTP.'}</div>`;
+      }
+    } catch (err) {
+      if (alertBox) alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-exclamation-octagon-fill me-2"></i>Error connecting to server: ${err.message}</div>`;
+    } finally {
+      btnSend.disabled = false;
+      btnSend.innerHTML = `Send OTP`;
+    }
+  };
+
+  window.verifyFacultyOtp = async function() {
+    const emailInput = document.getElementById('facultyAuthEmail').value.trim().toLowerCase();
+    const otpEntered = document.getElementById('facultyAuthOtp').value.trim();
+    const alertBox = document.getElementById('facultyAuthAlert');
+    const btnVerify = document.getElementById('btnFacultyVerifyOtp');
+
+    if (!otpEntered || otpEntered.length !== 6) {
+      if (alertBox) alertBox.innerHTML = `<div class="alert alert-warning py-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please enter a valid 6-digit OTP code.</div>`;
+      return;
+    }
+
+    btnVerify.disabled = true;
+    btnVerify.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Verifying...`;
+
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ 
+          action: "verifyOtp", 
+          email: emailInput, 
+          otp: otpEntered,
+          portalType: "faculty"
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.faculty) {
+        currentFaculty = data.faculty;
         
-        if (view === 'student') {
-          studentBtn.classList.add('active');
-          facultyBtn.classList.remove('active');
-        } else {
-          facultyBtn.classList.add('active');
-          studentBtn.classList.remove('active');
-        }
+        document.getElementById('facName').innerText = currentFaculty.name;
+        document.getElementById('facRoleBadge').innerText = currentFaculty.role;
+        document.getElementById('facDept').innerText = currentFaculty.department;
+        document.getElementById('facSpec').innerText = currentFaculty.specialization || 'General';
+        document.getElementById('facSec').innerText = currentFaculty.section;
 
-        const response = await fetch(fileToFetch);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const htmlText = await response.text();
-        
-        // Remove old dynamically injected portal scripts
-        document.querySelectorAll('.dynamic-portal-script').forEach(s => s.remove());
+        document.getElementById('facultyAuthSection').style.display = 'none';
+        document.getElementById('facultyPortalWrapper').style.display = 'block';
 
-        // Inject HTML
-        container.innerHTML = htmlText;
+        loadPendingApplications();
+      } else {
+        if (alertBox) alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-x-circle-fill me-2"></i>${data.message || 'Authentication failed.'}</div>`;
+      }
+    } catch (err) {
+      if (alertBox) alertBox.innerHTML = `<div class="alert alert-danger py-2"><i class="bi bi-exclamation-octagon-fill me-2"></i>Authentication Error: ${err.message}</div>`;
+    } finally {
+      btnVerify.disabled = false;
+      btnVerify.innerHTML = `Verify & Login`;
+    }
+  };
 
-        // Execute script tags inside dynamic HTML safely
-        const scriptTags = container.querySelectorAll('script');
-        scriptTags.forEach(script => {
-          if (script.src && script.src.includes('accounts.google.com/gsi/client')) {
-            return; // Skip duplicating GIS SDK script
-          }
-          const newScript = document.createElement('script');
-          newScript.classList.add('dynamic-portal-script');
-          if (script.src) {
-            newScript.src = script.src;
-          } else {
-            newScript.textContent = script.textContent;
-          }
-          document.body.appendChild(newScript);
-        });
+  window.resetFacultyAuthStep = function() {
+    document.getElementById('facultyEmailInputStep').style.display = 'flex';
+    document.getElementById('facultyOtpInputStep').style.display = 'none';
+    document.getElementById('facultyAuthOtp').value = '';
+    const alertBox = document.getElementById('facultyAuthAlert');
+    if (alertBox) alertBox.innerHTML = '';
+  };
 
-      } catch (err) {
-        container.innerHTML = `
-          <div class="alert alert-danger p-4 text-center">
-            <i class="bi bi-exclamation-triangle-fill fs-1"></i>
-            <h5 class="mt-2">Failed to load interface module</h5>
-            <p class="mb-0">${err.message}</p>
-          </div>`;
+  window.logoutFaculty = function() {
+    currentFaculty = null;
+    document.getElementById('facultyPortalWrapper').style.display = 'none';
+    document.getElementById('facultyAuthSection').style.display = 'block';
+    document.getElementById('facultyAuthEmail').value = '';
+    resetFacultyAuthStep();
+  };
+
+  window.renderStudentCard = function(student) {
+    if (!student) return '';
+
+    let photoSrc = 'https://via.placeholder.com/100x120?text=No+Photo';
+    const rawPhoto = student.base64Photo || student.photoUrl || student.photoData;
+
+    if (rawPhoto) {
+      if (rawPhoto.startsWith('data:image') || rawPhoto.startsWith('http')) {
+        photoSrc = rawPhoto;
+      } else {
+        photoSrc = `data:image/jpeg;base64,${rawPhoto}`;
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      switchPortal('student');
-    });
-  </script>
+    const rowId = student.rowIndex || student.rowId;
+    const status = student.appStatus || student.status || 'PENDING';
+    const spec = student.spec || student.specialization || 'N/A';
+    const dept = student.dept || student.department || 'N/A';
+    const sec = student.sec || student.section || 'N/A';
+
+    return `
+      <div class="card border-0 shadow-sm p-3 mb-3 rounded-4 bg-light">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-2 text-center">
+            <img src="${photoSrc}" 
+                 alt="Student Photo" 
+                 class="img-thumbnail rounded-3" 
+                 style="width: 100px; height: 120px; object-fit: cover;"
+                 onerror="this.src='https://via.placeholder.com/100x120?text=Error';" />
+          </div>
+
+          <div class="col-md-6">
+            <h6 class="fw-bold mb-1">${student.name || student.studentName} (${student.regNo || student.registerNumber})</h6>
+            <p class="small text-muted mb-1">
+              <strong>Dept:</strong> ${dept} | <strong>Spec:</strong> ${spec} | <strong>Sec:</strong> ${sec}
+              <span class="badge bg-warning text-dark ms-2">${status}</span>
+            </p>
+            <div class="d-flex gap-2 mt-2">
+              ${student.proof10thUrl ? `<a href="${student.proof10thUrl}" target="_blank" class="btn btn-sm btn-outline-info py-0"><i class="bi bi-file-earmark-pdf"></i> 10th Proof</a>` : ''}
+              ${student.proofTcUrl ? `<a href="${student.proofTcUrl}" target="_blank" class="btn btn-sm btn-outline-info py-0"><i class="bi bi-file-earmark-pdf"></i> TC Proof</a>` : ''}
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <input type="text" id="remark_${rowId}" class="form-control form-control-sm mb-2" placeholder="Enter remarks/reason...">
+            <div class="d-flex gap-2">
+              <button class="btn btn-success btn-sm w-50 fw-bold" onclick="submitDecision('${rowId}', 'APPROVE')">
+                <i class="bi bi-check-circle"></i> Approve
+              </button>
+              <button class="btn btn-danger btn-sm w-50 fw-bold" onclick="submitDecision('${rowId}', 'REJECT')">
+                <i class="bi bi-x-circle"></i> Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  window.loadPendingApplications = async function() {
+    const container = document.getElementById('applicationsContainer');
+    if (!container) return;
+    container.innerHTML = `<div class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span> Loading applications...</div>`;
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getPendingApplications", email: currentFaculty.email })
+      });
+
+      const rawText = await res.text();
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (e) {
+        throw new Error("Invalid JSON response received from server.");
+      }
+
+      if (data.success && data.data && data.data.length > 0) {
+        let html = '';
+        data.data.forEach(item => {
+          html += window.renderStudentCard(item);
+        });
+        container.innerHTML = html;
+      } else {
+        container.innerHTML = `<div class="alert alert-info text-center rounded-3 py-3">No pending applications found for your section/department.</div>`;
+      }
+    } catch (err) {
+      container.innerHTML = `<div class="alert alert-danger text-center rounded-3 py-2">Error loading applications: ${err.message}</div>`;
+    }
+  };
+
+  window.submitDecision = async function(rowIndex, decision) {
+    const remarksInput = document.getElementById(`remark_${rowIndex}`);
+    const remarks = remarksInput ? remarksInput.value.trim() : '';
+    const alertBox = document.getElementById('facultyActionAlert');
+    if (alertBox) alertBox.innerHTML = '';
+
+    if (decision === 'REJECT' && !remarks) {
+      if (alertBox) {
+        alertBox.innerHTML = `<div class="alert alert-warning alert-dismissible fade show py-2" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Please enter remarks explaining why the photo or application is being rejected.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "processFacultyAction",
+          rowIndex: rowIndex,
+          decision: decision,
+          remarks: remarks,
+          role: currentFaculty.role
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        if (alertBox) {
+          alertBox.innerHTML = `<div class="alert alert-success alert-dismissible fade show py-2" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>${data.message || 'Application updated successfully.'}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>`;
+        }
+        loadPendingApplications();
+      } else {
+        if (alertBox) {
+          alertBox.innerHTML = `<div class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+            <i class="bi bi-x-circle-fill me-2"></i>Failed to process action: ${data.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>`;
+        }
+      }
+    } catch (err) {
+      if (alertBox) {
+        alertBox.innerHTML = `<div class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+          <i class="bi bi-exclamation-octagon-fill me-2"></i>Error processing action: ${err.message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
+      }
+    }
+  };
+</script>
+
 </body>
 </html>
